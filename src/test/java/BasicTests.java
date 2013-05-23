@@ -88,10 +88,10 @@ public class BasicTests {
 	private void emptyDocument() {
 		String emptyDocumentJS =
 				"ve.instances[0].model.change(" + 
-						"ve.dm.Transaction.newFromRemoval(" +
-							"ve.instances[0].model.documentModel," +
-								"new ve.Range( 0, ve.instances[0].model.documentModel.data.getLength() )" + 
-						")" +
+					"ve.dm.Transaction.newFromRemoval(" +
+						"ve.instances[0].model.documentModel," +
+							"new ve.Range( 0, ve.instances[0].model.documentModel.data.getLength() )" + 
+					")" +
 				");";
 		((JavascriptExecutor) driver).executeScript(emptyDocumentJS);
 	}
