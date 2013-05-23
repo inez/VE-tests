@@ -1,0 +1,8 @@
+<!DOCTYPE suite SYSTEM "http://beust.com/testng/testng-1.0.dtd" >
+<suite name="VE-tests">
+	<test name="testing" preserve-order="true">
+		<classes>
+			<class name="BasicTests"/>
+		</classes>
+	</test>
+</suite>
