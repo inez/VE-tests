@@ -1,103 +1,84 @@
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.firefox.FirefoxDriver;
-import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.testng.annotations.AfterClass;
 
 @Test
-public class BasicTests {
+public class BasicTests extends BaseTest {
 
-	private WebDriver driver;
-
-	@BeforeClass
-	public void setUp() {
-		// TODO: Browser should be part of the configuration or maven parameter
-		if ( false ) {
-			driver = new FirefoxDriver();
-		} else {
-			driver = new ChromeDriver();			
-		}
-		// TODO: Make url part of the configuration
-		driver.get("http://192.168.142.128/mw/extensions/VisualEditor/demos/ve/?page=simple");
+	@Test(groups={"BasicTests"})
+	public void insertTextByTypingIntoEmptyDocument() throws Exception {
+		emptyDocument();
+		showSelection(0);
+		Thread.sleep(250);
+		documentNode.sendKeys("Hello world! What are you up to?");
+		documentNode.sendKeys(Keys.ESCAPE);
+		assertEqualsJson(
+				getHtmlSummaryFromEditor(),
+				getHtmlSummaryFromHtml("<html><body><p>Hello world! What are you up to?</p></body></html>")
+		);
+	}
+	
+	@Test(groups={"BasicTests"})
+	public void insertTextByTypingIntoNotEmptyDocument() throws Exception {
+		loadDocument("<html><body><p>Lorem</p></body></html>");
+		showSelection(6);
+		Thread.sleep(250);
+		documentNode.sendKeys(" ipsum dolor sit amet.");
+		documentNode.sendKeys(Keys.ESCAPE);
+		assertEqualsJson(
+				getHtmlSummaryFromEditor(),
+				getHtmlSummaryFromHtml("<html><body><p>Lorem ipsum dolor sit amet.</p></body></html>")
+		);
 	}
 
 	@Test(groups={"BasicTests"})
-	public void simpleTyping() throws Exception {
-		emptyDocument();
-		showSelection(0);
-		
-		//
-		// Interaction
-		//
-		WebElement documentNode = driver.findElement(By.className("ve-ce-documentNode"));
-		documentNode.sendKeys("123");
+	public void breakParagraphWithEnter() throws Exception {
+		loadDocument("<html><body><p>Lorem ipsum dolor sit amet.</p></body></html>");
+		showSelection(12);
+		Thread.sleep(250);
+		documentNode.sendKeys(Keys.RETURN); // break after "Lorem ipsum"
+		documentNode.sendKeys(Keys.ESCAPE);
+		showSelection(20);
+		Thread.sleep(250);
+		documentNode.sendKeys(Keys.RETURN);// break after "dolor"
+		documentNode.sendKeys(Keys.ESCAPE);
+		assertEqualsJson(
+				getHtmlSummaryFromEditor(),
+				getHtmlSummaryFromHtml("<html><body><p>Lorem ipsum</p><p> dolor</p><p> sit amet.</p></body></html>")
+		);
+	}
+
+	@Test(groups={"BasicTests"})
+	public void breakListItemWithEnter() throws Exception {
+		loadDocument("<html><body><ul><li>item1item2item3</li></ul></body></html>");
+		showSelection(8);
+		Thread.sleep(250);
+		documentNode.sendKeys(Keys.RETURN); // break after "item1"
+		documentNode.sendKeys(Keys.ESCAPE);
+		showSelection(17);
+		Thread.sleep(250);
+		documentNode.sendKeys(Keys.RETURN); // break after "item2"
+		documentNode.sendKeys(Keys.ESCAPE);
+		assertEqualsJson(
+				getHtmlSummaryFromEditor(),
+				getHtmlSummaryFromHtml("<html><body><ul><li>item1</li><li><p>item2</p></li><li><p>item3</p></li></ul></body></html>")
+		);
+	}
+
+	@Test(groups={"BasicTests"})
+	public void exitListWithDoubleReturn() throws Exception {
+		loadDocument("<html><body><ul><li>item1</li><li>item2</li><li>item3</li></ul></body></html>");
+		showSelection(26);
+		Thread.sleep(250);
 		documentNode.sendKeys(Keys.RETURN);
-		documentNode.sendKeys("456");
-		
-		//
-		// Actual
-		//
-		String getActualJS =
-				"return JSON.stringify(" +
-					"ve.getDomElementSummary(" +
-						"ve.dm.converter.getDomFromData(" +
-							"ve.instances[0].model.documentModel.getFullData()," +
-							"ve.instances[0].model.documentModel.getStore()," +
-							"ve.instances[0].model.documentModel.getInternalList()" +
-						")" +
-					")"+
-				");";
-		String actualJson = (String) ((JavascriptExecutor) driver).executeScript(getActualJS);
-
-		//
-		// Expected
-		//
-		String getExpectedJs =
-				"return JSON.stringify(" +
-						"ve.getDomElementSummary( ve.createDocumentFromHTML( '<html><body><p>123</p><p>456</p></body></html>' ) )" +
-				");";
-		String expectedJson = (String) ((JavascriptExecutor) driver).executeScript(getExpectedJs);
-		
-		//
-		// Compare + Assert
-		//
-		ObjectMapper mapper = new ObjectMapper();
-		Object actual = mapper.readValue(actualJson, Object.class);
-		Object expected = mapper.readValue(expectedJson, Object.class);
-		//Assert.assertEquals(actual.equals(expected), true);
-		Assert.assertEquals(actual, expected);
-	}
-	
-	private void showSelection(int at) {
-		showSelection(at, at);
-	}
-	
-	private void showSelection(int from, int to) {
-		String showSelectiontJS = "ve.instances[0].view.showSelection( new ve.Range( " + from + ", " + to + " ) );";
-		((JavascriptExecutor) driver).executeScript(showSelectiontJS);
-	}
-	
-	private void emptyDocument() {
-		String emptyDocumentJS =
-				"ve.instances[0].model.change(" + 
-					"ve.dm.Transaction.newFromRemoval(" +
-						"ve.instances[0].model.documentModel," +
-							"new ve.Range( 0, ve.instances[0].model.documentModel.data.getLength() )" + 
-					")" +
-				");";
-		((JavascriptExecutor) driver).executeScript(emptyDocumentJS);
+		documentNode.sendKeys(Keys.ESCAPE);
+		documentNode.sendKeys(Keys.RETURN);
+		documentNode.sendKeys(Keys.ESCAPE);
+		documentNode.sendKeys("Bye!");
+		documentNode.sendKeys(Keys.ESCAPE);
+		assertEqualsJson(
+				getHtmlSummaryFromEditor(),
+				getHtmlSummaryFromHtml("<html><body><ul><li>item1</li><li>item2</li><li>item3</li></ul><p>Bye!</p></body></html>")
+		);
 	}
 
-	@AfterClass
-	public void tearDown() {
-		driver.close();
-	}
 }
