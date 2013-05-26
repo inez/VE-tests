@@ -19,8 +19,8 @@ public abstract class BaseTest {
 
 	@BeforeClass
 	public void setUp() {
-		//driver = new ChromeDriver();
-		driver = new FirefoxDriver();
+		driver = new ChromeDriver();
+		//driver = new FirefoxDriver();
 		driver.get("http://192.168.142.128/mw/extensions/VisualEditor/demos/ve/?page=simple");
 		documentNode = driver.findElement(By.className("ve-ce-documentNode"));
 	}
@@ -35,7 +35,7 @@ public abstract class BaseTest {
 	}
 	
 	protected void showSelection(int from, int to) {
-		String showSelectiontJS = "ve.instances[0].view.showSelection( new ve.Range( " + from + ", " + to + " ) );";
+		String showSelectiontJS = "ve.instances[0].model.change( null, new ve.Range( " + from + ", " + to + " ) );";
 		((JavascriptExecutor) driver).executeScript(showSelectiontJS);
 	}
 	
@@ -87,12 +87,13 @@ public abstract class BaseTest {
 	}
 	
 	protected void assertEqualsJson(String actualJson, String expectedJson) throws Exception {
+		/*
 		System.out.println("------------------");
 		System.out.println("actualJson" + actualJson);
 		System.out.println("------------------");
 		System.out.println("expectedJson" + expectedJson);
 		System.out.println("------------------");
-
+		*/
 		Object actual = mapper.readValue(actualJson, Object.class);
 		Object expected = mapper.readValue(expectedJson, Object.class);
 		Assert.assertEquals(actual, expected);
