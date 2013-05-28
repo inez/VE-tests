@@ -1,4 +1,7 @@
+import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebElement;
+import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
@@ -18,18 +21,25 @@ public class BasicTests extends BaseTest {
 		showSelection(0);
 		documentNode.sendKeys("Hello world! What are you up to?");
 		documentNode.sendKeys(Keys.ESCAPE);
+		Range range = getSelection();
+		Assert.assertTrue(range.isCollapsed());
+		Assert.assertEquals(range.from, 33);
 		assertEqualsJson(
 				getHtmlSummaryFromEditor(),
 				getHtmlSummaryFromHtml("<html><body><p>Hello world! What are you up to?</p></body></html>")
 		);
+		
 	}
-	
+
 	@Test(groups={"BasicTests"})
 	public void insertTextByTypingIntoNotEmptyDocument() throws Exception {
 		loadDocument("<html><body><p>Lorem</p></body></html>");
 		showSelection(6);
 		documentNode.sendKeys(" ipsum dolor sit amet.");
 		documentNode.sendKeys(Keys.ESCAPE);
+		Range range = getSelection();
+		Assert.assertTrue(range.isCollapsed());
+		Assert.assertEquals(range.from, 28);
 		assertEqualsJson(
 				getHtmlSummaryFromEditor(),
 				getHtmlSummaryFromHtml("<html><body><p>Lorem ipsum dolor sit amet.</p></body></html>")
@@ -45,6 +55,9 @@ public class BasicTests extends BaseTest {
 		showSelection(20);
 		documentNode.sendKeys(Keys.RETURN);// break after "dolor"
 		documentNode.sendKeys(Keys.ESCAPE);
+		Range range = getSelection();
+		Assert.assertTrue(range.isCollapsed());
+		Assert.assertEquals(range.from, 22);
 		assertEqualsJson(
 				getHtmlSummaryFromEditor(),
 				getHtmlSummaryFromHtml("<html><body><p>Lorem ipsum</p><p> dolor</p><p> sit amet.</p></body></html>")
@@ -60,6 +73,9 @@ public class BasicTests extends BaseTest {
 		showSelection(17);
 		documentNode.sendKeys(Keys.RETURN); // break after "item2"
 		documentNode.sendKeys(Keys.ESCAPE);
+		Range range = getSelection();
+		Assert.assertTrue(range.isCollapsed());
+		Assert.assertEquals(range.from, 21);
 		assertEqualsJson(
 				getHtmlSummaryFromEditor(),
 				getHtmlSummaryFromHtml("<html><body><ul><li>item1</li><li><p>item2</p></li><li><p>item3</p></li></ul></body></html>")
@@ -76,10 +92,36 @@ public class BasicTests extends BaseTest {
 		documentNode.sendKeys(Keys.ESCAPE);
 		documentNode.sendKeys("Bye!");
 		documentNode.sendKeys(Keys.ESCAPE);
+		Range range = getSelection();
+		Assert.assertTrue(range.isCollapsed());
+		Assert.assertEquals(range.from, 34);
 		assertEqualsJson(
 				getHtmlSummaryFromEditor(),
 				getHtmlSummaryFromHtml("<html><body><ul><li>item1</li><li>item2</li><li>item3</li></ul><p>Bye!</p></body></html>")
 		);
 	}
 
+	@Test(groups={"BasicTests"})
+	public void preAnnotationsWithTyping() throws Exception {
+		WebElement boldButton = driver.findElement(By.className("ve-ui-icon-bold-b"));
+		loadDocument("<html><body><p>ipsumsit</p></body></html>");
+		showSelection(1);
+		boldButton.click();
+		documentNode.sendKeys("Lorem ");
+		showSelection(12);
+		boldButton.click();
+		documentNode.sendKeys(" dolor ");
+		showSelection(22);
+		boldButton.click();
+		documentNode.sendKeys(" amet.");
+
+		Range range = getSelection();
+		Assert.assertTrue(range.isCollapsed());
+		Assert.assertEquals(range.from, 28);
+		assertEqualsJson(
+				getHtmlSummaryFromEditor(),
+				getHtmlSummaryFromHtml("<html><body><p><b>Lorem </b>ipsum<b> dolor </b>sit<b> amet.</b></p></body></html>")
+		);
+	}
+	
 }

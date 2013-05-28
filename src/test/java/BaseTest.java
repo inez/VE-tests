@@ -50,8 +50,7 @@ public abstract class BaseTest {
 		((JavascriptExecutor) driver).executeScript(emptyDocumentJS);
 	}
 	
-	protected void loadDocument(String html)
-	{
+	protected void loadDocument(String html) {
 		emptyDocument();
 		String loadDocumentJS =
 				"var store = new ve.dm.IndexValueStore();" + 
@@ -61,19 +60,17 @@ public abstract class BaseTest {
 		((JavascriptExecutor) driver).executeScript(loadDocumentJS);
 	}
 	
-	protected String getHtmlSummaryFromHtml(String html)
-	{
-		String getExpectedJs =
+	protected String getHtmlSummaryFromHtml(String html) {
+		String js =
 				"return JSON.stringify(" +
 						"ve.getDomElementSummary( ve.createDocumentFromHTML( '" + html + "' ) )" +
 				");";
-		return (String) ((JavascriptExecutor) driver).executeScript(getExpectedJs);
+		return (String) ((JavascriptExecutor) driver).executeScript(js);
 		
 	}
 	
-	protected String getHtmlSummaryFromEditor()
-	{
-		String getActualJS =
+	protected String getHtmlSummaryFromEditor() {
+		String js =
 				"return JSON.stringify(" +
 					"ve.getDomElementSummary(" +
 						"ve.dm.converter.getDomFromData(" +
@@ -83,7 +80,12 @@ public abstract class BaseTest {
 						")" +
 					")"+
 				");";
-		return (String) ((JavascriptExecutor) driver).executeScript(getActualJS);
+		return (String) ((JavascriptExecutor) driver).executeScript(js);
+	}
+	
+	protected Range getSelection() throws Exception {
+		String selectionString = (String) ((JavascriptExecutor) driver).executeScript("return JSON.stringify(ve.instances[0].model.selection);");
+		return mapper.readValue(selectionString, Range.class);		
 	}
 	
 	protected void assertEqualsJson(String actualJson, String expectedJson) throws Exception {
