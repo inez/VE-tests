@@ -53,9 +53,10 @@ public abstract class BaseTest {
 	protected void loadDocument(String html) {
 		emptyDocument();
 		String loadDocumentJS =
-				"var store = new ve.dm.IndexValueStore();" + 
-				"var internalList = new ve.dm.InternalList();" +
-				"var data = ve.dm.converter.getDataFromDom( ve.createDocumentFromHTML( '" + html + "' ), store, internalList ).getData();" +
+				"var doc = new ve.dm.Document( [] );" +
+				"var store = doc.getStore();" + 
+				"var internalList = doc.getInternalList();" +
+				"var data = ve.dm.converter.getDataFromDom( ve.createDocumentFromHtml( '" + html + "' ), store, internalList ).getData();" +
 				"ve.instances[0].model.change( ve.dm.Transaction.newFromInsertion( ve.instances[0].model.documentModel, 0, data ) );";
 		((JavascriptExecutor) driver).executeScript(loadDocumentJS);
 	}
@@ -63,7 +64,7 @@ public abstract class BaseTest {
 	protected String getHtmlSummaryFromHtml(String html) {
 		String js =
 				"return JSON.stringify(" +
-						"ve.getDomElementSummary( ve.createDocumentFromHTML( '" + html + "' ) )" +
+						"ve.getDomElementSummary( ve.createDocumentFromHtml( '" + html + "' ) )" +
 				");";
 		return (String) ((JavascriptExecutor) driver).executeScript(js);
 		
