@@ -123,5 +123,18 @@ public class BasicTests extends BaseTest {
 				getHtmlSummaryFromHtml("<html><body><p><b>Lorem </b>ipsum<b> dolor </b>sit<b> amet.</b></p></body></html>")
 		);
 	}
+
+	// https://bugzilla.wikimedia.org/show_bug.cgi?id=43082
+	@Test(groups={"BasicTests"})
+	public void moveCursorNativelyAndBreak() throws Exception {
+		loadDocument("<html><body><p>This!</p></body></html>");
+		showSelection(5);
+		documentNode.sendKeys(Keys.HOME);
+		documentNode.sendKeys(Keys.RETURN);
+		assertEqualsJson(
+				getHtmlSummaryFromEditor(),
+				getHtmlSummaryFromHtml("<html><body><p></p><p>This!</p></body></html>")
+		);
+	}
 	
 }
