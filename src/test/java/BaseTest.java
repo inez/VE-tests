@@ -21,7 +21,7 @@ public abstract class BaseTest {
 	public void setUp() {
 		driver = new ChromeDriver();
 		//driver = new FirefoxDriver();
-		driver.get("http://192.168.142.128/mw/extensions/VisualEditor/demos/ve/?page=simple");
+		driver.get("http://public.inez.wikia-dev.com/VisualEditor/demos/ve/?page=simple");
 		documentNode = driver.findElement(By.className("ve-ce-documentNode"));
 	}
 	
